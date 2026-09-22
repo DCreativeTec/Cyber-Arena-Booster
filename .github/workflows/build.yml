@@ -1,0 +1,41 @@
+name: Build Cyber Arena Booster
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          mkdir project
+          unzip -q Cyber-Arena-Booster-v1.1-source.zip -d project
+          echo "Project extracted:"
+          find project -maxdepth 3 -type f | head -100
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build APK
+        working-directory: project
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cyber-Arena-Booster-APK
+          path: |
+            project/**/build/outputs/apk/**/*.apk
